@@ -27,7 +27,7 @@ class JSM:
                     "reporter": {
                         "name": user_info.get("real_name", "n/a")
                     },
-                    "thread_ts": message.get("ts"),
+                    "customfield_10047": message.get("ts"),
                     "description": {
                         "content": [
                             {
@@ -49,6 +49,49 @@ class JSM:
             }
 
         response = self._session.post(url=f"{self._base_url}/issue",
+                                      headers=headers,
+                                      json=payload)
+        return response.json()
+
+    def search_issue(self, thread_ts):
+        headers = {
+            "Accept": "application/json",
+        }
+        payload = {
+            "jql": f"thread_ts ~ {thread_ts}"
+        }
+        response = self._session.post(url=f"{self._base_url}/search",
+                                      headers=headers,
+                                      json=payload)
+        return response.json()
+
+    def add_comment(self, issue_id, message):
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "body": {
+                "content": [
+                    {
+                        "content": [
+                            {
+                                "text": message,
+                                "type": "text"
+                            }
+                        ],
+                        "type": "paragraph"
+                    }
+                ],
+                "type": "doc",
+                "version": 1
+            },
+            "reporter": {
+                "name": "Me!"
+            },
+        }
+        response = self._session.post(url=f"{self._base_url}/issue/"
+                                          f"{issue_id}/comment",
                                       headers=headers,
                                       json=payload)
         return response.json()
